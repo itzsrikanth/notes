@@ -36,10 +36,31 @@
   - debug
   - self-documenting
 14. `lexical scope` are optimizable bcz we can predict at compile time, bcz the closures close over the values and takes them along wherever it is passed unlike in dynamic scope which needs to figured at runtime. becomes unpredictable as well as flexible.
-15. Function errors:
+15. Functions:
   - `SyntaxError` due to missing function name, when trying to invoke:
     ```javascript
       function(){}();
+    ```
+    This is because when parser encounters `function` keyword it treats it as `function declaration`, not as `function expression`. Adding parenthesis around it converts into a expression, bcz parens cannot contain statements.
+
+    But then can be omitted when already function expression is expected like:
+    ```javascript
+    var i = function(){ return 10; }();
+    true && function(){ /* code */ }();
+    0, function(){ /* code */ }();
+    ```
+
+    So, in general, functions can be used as expressions without parens by prefixing with unary operators, this will save a byte:
+    ```javascript
+    !function(){ /* code */ }();
+    ~function(){ /* code */ }();
+    -function(){ /* code */ }();
+    +function(){ /* code */ }();
+    ```
+    Or
+    ```javascript
+    new function(){ /* code */ }
+    new function(){ /* code */ }()
     ```
   - `SyntaxError` due to missing expression:
     ```javascript
@@ -59,3 +80,37 @@
       function foo(){}
       (1);
     ```
+  - To recursively call self (anonymous function)
+    ```javascript
+    function() { arguments.callee(); };
+    ```
+16. `let` cannot replace `var`. Wherever we want to create temporary variable, use **Explicit blocks**:
+  ```javascript
+  {
+    let tmp;
+    tmp = a;
+    a = b;
+    b = tmp;
+  }
+  ```
+  This pattern lets us restrict the scope of `tmp`
+  - `for` loops' iterator should be declared as `let` because no reason for iterator to be available for use outside the `for` block.
+  - find and replacing `var` with `let` losses the stylistic signal of the developer's intention. Some variables are intentional block scope and some are lexical, we will lose this info if all of them are replace entirely.
+  - For readability, all the declarations of variables should be in the screen wherever it is going to get used. In case it is getting used after many lines, we can redeclare using `var` for variable scope understandability.
+  - It would be sensible to use `const` with primitive datatypes
+17. Hoisting
+  - Function declaration vs expression: former gets hoisted
+  - mutual recursion, circular dependency
+  - Function hoisting is great, bcz declarations can be at bottom of file (even after return statement) and the execution can be at top so that we need to scroll till bottom to find them, but variable hoisting usage will confuse other people reading code.
+  - Temporal Dead Zone (TDZ) error: 
+  - `var`
+    - variable is added at compile-time to its enclosing lexical scope
+    - at runtime when scope starts, the variable gets initialized with `undefined` value
+  - `let`
+    - similar to `var`, it is added to lexical scope
+    - but not initialized with `undefined` when scope begins, rather when it encounters the `let` line declaration. *Hence hoisting works with `let`, but does not gets initialized which causes the error*
+
+### Closure
+
+## Sources
+- [IIFE - Benalman](http://benalman.com/news/2010/11/immediately-invoked-function-expression/)
