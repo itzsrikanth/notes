@@ -111,6 +111,102 @@
     - but not initialized with `undefined` when scope begins, rather when it encounters the `let` line declaration. *Hence hoisting works with `let`, but does not gets initialized which causes the error*
 
 ### Closure
+1. closure is ability of function to remember its lexical scope even when the funciton is executed outside the lexical scope.
+2. examples:
+  - settimeout, eventHandlers etc
+  - ```javascript
+    for (var i = 0; i < 5; i++) {
+      setTimeout(function(){
+        console.log(i);
+      }, i * 100);
+    }
+    ```
+    Here, 5 6s are printed bcz each `setTimeout` callback closes over same `var` declarations (attached to global/parent lexical scope). So, 6 is used in every closure.
+    ```javascript
+    for (let i = 0; i < 5; i++) {
+      setTimeout(function(){
+        console.log(i);
+      }, i * 100);
+    }
+    ```
+    But when `let` is used here, it creates a new variable for each `for` block and closure closes over individual copy of `i`.
+
+    This can be again solved using IIFE by creating new lexical scopes and adding new `i` for each of them. Here, the `for` loop's `i` is shadowed
+    ```javascript
+    for (var i = 0; i < 5; i++) {
+      (function(i){
+        setTimeout(function(){
+          console.log(i);
+        }, i * 100)
+      })(i);
+    }
+    ```
+
+    Instead of lexical scope, we can do a block scoping by doing:
+    ```javascript
+    for (var i = 0; i < 5; i++) {
+      let j = i;
+      setTimeout(function(){
+        console.log(j);
+      }, j * 100);
+    }
+    ```
+3. `closure` is not a `function`, it is its characteristics.
+4. Module pattern: most imp code organisation pattern
+   - an external scope, say function, in which this logic gets executed atleast once.
+   - internal reference to publicAPI that we return from module, having closure over internal state
+   - ES6, entire file content is treated as module with elements by default hidden.
+5. Tips for efficient organisation in module:
+   - Stateless functions are to be separted
+   - DOM functions and data model functions to be separated
+
+
+### Object oriented
+1. dynamic scope -> this
+  - pointing of `this` for a `this aware function` **only depends on how the function was called**
+   - four ways of calling function:
+      ```javascript
+        var bar = 'bar1';
+        function foo() {
+          console.log(this.bar);
+        }
+      ```
+      - *default binding rule*: not best way to call `this` aware function. when nothing match, points to global object in non-strict mode. but in strict mode, it is `undefined`
+        ```javascript
+          foo();    // "bar1"
+        ```
+      - implicit binding rule: call `foo` in context of `o2`. Here, we have a problem of `losing this-binding`. When `o2`'s `foo` is passed to somewhere else, that function will be called in different context and will lose `o2` as context.
+        ```javascript
+          var o2 = { bar: 'bar2', foo };
+          o2.foo();   // "bar2"
+        ```
+      - explicit: `call` / `apply` <br />
+        under the cover uses explicit hard-binding - `bind`
+      - `new`: 
+        - nothing to do with creating new instance of classes.
+        - a poorly designed system to create new objects 
+        - Four things happen when this is used:
+          - brand new empty object created
+          - **newly created object gets linked to another object**
+          - newly created object in step-1 is passed as `this` context to the function
+          - if the function does not return own object, `new` assumes that the object passed in should be returned i.e. "`return this;`"
+        - any function with a `new` keyword infront is called `constructor call`
+  - four rules for `this` precedence
+    - if function called `new`, then use new created object
+    - else if `call` or `apply` used? if yes, use that apply
+    - called with context object
+    - default: global (non-strict) or undefined (strict)
+  - **A `new` keyword has power to trump hard-binding of `bind` method**
+  - `this` is not special keyword in arrow function, just a regular variable.
+2. Lexical scope give a author time predictability and `this` gives flexibility but hard-binding overshoots it. There is always a tension between them.
+3. dont use `class` or `arrow function`
+4. inheritance
+5. behaviour delegation
+6. OO vs OLOO (objects linked to other objects)
+
+### Prototypes
+1. Objects are built with `constructor calls` -- `new` keyword
+2. A constructor makes an object ~~based on~~ "linked to" its own prototype. So, it is a `retroactive inheritance`. The prototype's properties are not copied to new ones, rather they are linked.
 
 ## Sources
 - [IIFE - Benalman](http://benalman.com/news/2010/11/immediately-invoked-function-expression/)
