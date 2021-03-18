@@ -96,6 +96,22 @@ Definition evolution for pure function
   - loose currying
   - string currying
 
+#### Composition
+- composition of non-unary functions can be achieved by currying
+
+### Immutability
+- change should be there, but predictable
+- types:
+  - assignment immutability
+- in general functional programming, re-assignment itself is not a preferred action. so there is a need for `const` keyword in language?
+- passing up a value to a function not defined in the scope is dangerous since it can be source of bug by introducing unexpected changes. Functional programmers try to avoid such source of errors by using design patterns
+- when you need a mutable data structure, what you actually need is immutable data structure. It allows structured, controlled intentional mutation
+
+### Lists
+#### Functors
+- a value/collection over which values in it can be mapped
+- transformation operation
+
 
 ### Glossary
 - `predicate` - in general, unary functions returning true or false
